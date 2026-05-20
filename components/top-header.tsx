@@ -19,10 +19,13 @@ export function TopHeader({
 }: TopHeaderProps) {
   return (
     <header className={cn(
-      "flex items-center justify-between px-4 h-14 safe-area-inset-top z-20",
-      transparent ? "bg-transparent absolute top-0 left-0 right-0" : "bg-card border-b border-border"
+      "flex items-center justify-between px-4 h-14 safe-area-inset-top z-1000 shrink-0",
+      transparent
+        ? "bg-card/85 backdrop-blur-md border-b border-border/60 relative"
+        : "bg-card border-b border-border relative"
     )}>
       <button
+        type="button"
         onClick={onMenuClick}
         className={cn(
           "w-10 h-10 rounded-full flex items-center justify-center transition-colors",
@@ -46,6 +49,7 @@ export function TopHeader({
       </div>
 
       <button
+        type="button"
         onClick={onNotificationsClick}
         className={cn(
           "w-10 h-10 rounded-full flex items-center justify-center transition-colors relative",

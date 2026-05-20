@@ -13,6 +13,8 @@ import { LoginScreen } from "@/components/screens/login-screen"
 import { RegisterScreen } from "@/components/screens/register-screen"
 import { ProfileSettingsScreen } from "@/components/screens/profile-settings-screen"
 import { SettingsScreen } from "@/components/screens/settings-screen"
+import { SplashScreen } from "@/components/screens/splash-screen"
+import { BundlesScreen } from "@/components/screens/bundles-screen"
 import { APDetailSheet } from "@/components/ap-detail-sheet"
 import { RechargeSheet } from "@/components/recharge-sheet"
 import { PurchaseConfirmSheet } from "@/components/purchase-confirm-sheet"
@@ -23,13 +25,7 @@ export default function KonnectikApp() {
 
   // Auth loading splash
   if (state.authLoading) {
-    return (
-      <MobileShell>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-        </div>
-      </MobileShell>
-    )
+    return <SplashScreen />
   }
 
   // Auth screens
@@ -87,6 +83,59 @@ export default function KonnectikApp() {
     )
   }
 
+  // Bundles screen (full screen — opened from map "Accéder à la K-zone")
+  if (state.currentScreen === "bundles" && state.selectedAP) {
+    return (
+      <MobileShell>
+        <BundlesScreen
+          ap={state.selectedAP}
+          plans={state.plans.filter((p) => p.is_active)}
+          walletBalance={state.user?.wallet_balance_xaf || 0}
+          hasResumableBundle={!!state.activeBundle && state.remainingMinutes > 0 && !state.activeSegment}
+          resumableMinutes={state.remainingMinutes}
+          isEligibleForTrial={!state.user?.first_trial_used_at}
+          isConnected={state.activeSegment?.ap_id === state.selectedAP.id}
+          onBack={() => {
+            state.setSelectedAP(null)
+            state.setCurrentScreen("main")
+          }}
+          onBuyBundle={(plan) => {
+            state.setSelectedPlan(plan)
+            state.setShowBundlePurchaseConfirm(true)
+          }}
+          onResume={() => {
+            if (state.selectedAP) state.resumeSession(state.selectedAP)
+          }}
+          onAddFunds={() => state.setShowRechargeSheet(true)}
+        />
+        {/* Purchase Confirm Sheet — needs to be available from here too */}
+        {state.showBundlePurchaseConfirm && state.selectedPlan && state.selectedAP && (
+          <PurchaseConfirmSheet
+            plan={state.selectedPlan}
+            ap={state.selectedAP}
+            walletBalance={state.user?.wallet_balance_xaf || 0}
+            onClose={() => {
+              state.setShowBundlePurchaseConfirm(false)
+              state.setSelectedPlan(null)
+            }}
+            onConfirm={() => {
+              if (state.selectedPlan && state.selectedAP) {
+                state.purchaseBundle(state.selectedPlan, state.selectedAP.id)
+              }
+            }}
+          />
+        )}
+        {state.showRechargeSheet && (
+          <RechargeSheet
+            onClose={() => state.setShowRechargeSheet(false)}
+            onRecharge={(amount, method) => state.rechargeWallet(amount, method)}
+            userPhone={state.user?.phone || ""}
+          />
+        )}
+      </MobileShell>
+    )
+  }
+
   // App settings
   if (state.currentScreen === "settings") {
     return (
@@ -136,6 +185,10 @@ export default function KonnectikApp() {
           <MapScreen
             accessPoints={state.accessPoints}
             onAPSelect={state.setSelectedAP}
+            onAPAccess={(ap) => {
+              state.setSelectedAP(ap)
+              state.setCurrentScreen("bundles")
+            }}
             hasResumableBundle={!!state.activeBundle && state.remainingMinutes > 0 && !state.activeSegment}
             resumableBundleMinutes={state.remainingMinutes}
             activeAPId={state.activeSegment?.ap_id}

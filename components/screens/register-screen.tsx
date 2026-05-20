@@ -30,11 +30,22 @@ export function RegisterScreen({
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [referralCode, setReferralCode] = useState(prefillReferralCode || "")
   const [showPassword, setShowPassword] = useState(false)
+  const [pwdMismatch, setPwdMismatch] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    if (password !== confirmPassword) {
+      setPwdMismatch(true)
+      return
+    }
+    if (password.length < 6) {
+      setPwdMismatch(false)
+      return
+    }
+    setPwdMismatch(false)
     onRegister({ name, email, password, referralCode: referralCode || undefined })
   }
 
@@ -116,6 +127,25 @@ export function RegisterScreen({
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="confirm-password">Confirmer le mot de passe</FieldLabel>
+              <Input
+                id="confirm-password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Retapez votre mot de passe"
+                value={confirmPassword}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value)
+                  if (pwdMismatch) setPwdMismatch(false)
+                }}
+                className="h-12"
+                autoComplete="new-password"
+              />
+              {pwdMismatch && (
+                <p className="text-xs text-destructive mt-1">Les mots de passe ne correspondent pas</p>
+              )}
             </Field>
 
             <Field>

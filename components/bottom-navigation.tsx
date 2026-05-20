@@ -19,7 +19,7 @@ export function BottomNavigation({ activeTab, onTabChange, walletBalance = 0 }: 
   ]
 
   return (
-    <nav className="bg-card border-t border-border safe-area-inset-bottom">
+    <nav className="bg-card border-t border-border safe-area-inset-bottom shrink-0 z-1000 relative">
       <div className="flex items-center justify-around h-16">
         {tabs.map((tab) => {
           const Icon = tab.icon

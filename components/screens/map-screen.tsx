@@ -30,6 +30,7 @@ function toRealAP(ap: AnyAP): RealAccessPoint {
 interface MapScreenProps {
   accessPoints: AnyAP[]
   onAPSelect: (ap: AnyAP) => void
+  onAPAccess?: (ap: AnyAP) => void
   hasResumableBundle?: boolean
   resumableBundleMinutes?: number
   activeAPId?: string | null
@@ -38,6 +39,7 @@ interface MapScreenProps {
 export function MapScreen({
   accessPoints,
   onAPSelect,
+  onAPAccess,
   hasResumableBundle,
   resumableBundleMinutes,
   activeAPId,
@@ -85,6 +87,11 @@ export function MapScreen({
     if (original) onAPSelect(original)
   }
 
+  const handleAccess = (real: RealAccessPoint) => {
+    const original = lookup.get(real.id)
+    if (original) onAPAccess?.(original)
+  }
+
   return (
     <div className="flex-1 relative overflow-hidden">
       <MapCanvas
@@ -92,6 +99,7 @@ export function MapScreen({
         userLocation={userLocation}
         activeAPId={activeAPId}
         onAPSelect={handleSelect}
+        onAPAccess={handleAccess}
         recenterTrigger={recenterTick}
       />
 

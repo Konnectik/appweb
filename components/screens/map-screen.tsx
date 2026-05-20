@@ -86,7 +86,7 @@ export function MapScreen({
   }
 
   return (
-    <div className="flex-1 relative overflow-hidden min-h-[400px]" style={{ height: "100%" }}>
+    <div className="flex-1 relative overflow-hidden">
       <MapCanvas
         accessPoints={realAPs}
         userLocation={userLocation}

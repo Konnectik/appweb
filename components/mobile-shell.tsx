@@ -8,7 +8,9 @@ interface MobileShellProps {
 
 export function MobileShell({ children }: MobileShellProps) {
   return (
-    <div className="min-h-screen bg-background flex flex-col max-w-md mx-auto relative overflow-hidden">
+    // h-dvh = dynamic viewport height (handles mobile browser chrome correctly).
+    // h-screen fallback for older browsers.
+    <div className="h-dvh bg-background flex flex-col max-w-md mx-auto relative overflow-hidden">
       {children}
     </div>
   )

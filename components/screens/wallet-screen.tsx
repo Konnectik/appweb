@@ -91,8 +91,10 @@ export function WalletScreen({ balance, transactions, onAddFunds, onTransactionC
         <h2 className="text-sm font-medium text-muted-foreground mb-3">Transaction History</h2>
         
         {transactions.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No transactions yet</p>
+          <div className="flex flex-col items-center justify-center py-12 px-6">
+            <img src="/walletempty.png" alt="Wallet vide" className="w-32 h-32 object-contain mb-4 opacity-80" />
+            <p className="text-muted-foreground text-center">Aucune transaction pour l'instant</p>
+            <p className="text-xs text-muted-foreground/70 text-center mt-1">Rechargez votre wallet pour commencer</p>
           </div>
         ) : (
           <div className="flex flex-col gap-2">

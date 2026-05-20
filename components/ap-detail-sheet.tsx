@@ -82,7 +82,9 @@ export function APDetailSheet({
               !isOnline && "bg-muted-foreground"
             )} />
           </div>
-          <p className="text-sm text-muted-foreground">{ap.provider_name} &middot; {ap.zone_label}</p>
+          <p className="text-sm text-muted-foreground">
+            {[ap.provider_name, ap.location].filter(Boolean).join(" · ") || "K-Zone"}
+          </p>
         </div>
         <button
           onClick={onClose}
@@ -105,7 +107,9 @@ export function APDetailSheet({
         </div>
         <div className="flex items-center gap-1">
           <Star className="w-4 h-4 text-[#F59E0B] fill-current" />
-          <span className="text-sm text-foreground font-medium">{ap.avg_rating.toFixed(1)}</span>
+          <span className="text-sm text-foreground font-medium">
+            {(ap.rating ?? ap.avg_rating ?? 0).toFixed(1)}
+          </span>
         </div>
       </div>
 

@@ -101,9 +101,7 @@ export function RechargeSheet({ onClose, onRecharge, userPhone }: RechargeSheetP
                       : "border-border hover:border-muted-foreground"
                   )}
                 >
-                  <div className="w-10 h-10 rounded-full bg-[#FFCC00] flex items-center justify-center">
-                    <span className="text-xs font-bold text-black">MTN</span>
-                  </div>
+                  <img src="/momo.png" alt="MTN MoMo" className="w-10 h-10 object-contain" />
                   <span className="text-sm font-medium text-foreground">MTN MoMo</span>
                 </button>
                 <button
@@ -116,9 +114,7 @@ export function RechargeSheet({ onClose, onRecharge, userPhone }: RechargeSheetP
                       : "border-border hover:border-muted-foreground"
                   )}
                 >
-                  <div className="w-10 h-10 rounded-full bg-[#FF6600] flex items-center justify-center">
-                    <span className="text-xs font-bold text-white">OM</span>
-                  </div>
+                  <img src="/om.png" alt="Orange Money" className="w-10 h-10 object-contain" />
                   <span className="text-sm font-medium text-foreground">Orange Money</span>
                 </button>
               </div>

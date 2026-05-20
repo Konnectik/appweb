@@ -39,3 +39,6 @@ sql query result/
 pnpm-lock.yaml
 bun.lockb
 bun.lock
+
+# Sibling Flutter app — kept locally as reference only, not part of the web PWA
+konnectik-flutter/

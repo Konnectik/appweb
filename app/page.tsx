@@ -12,6 +12,7 @@ import { RewardsScreen } from "@/components/screens/rewards-screen"
 import { LoginScreen } from "@/components/screens/login-screen"
 import { RegisterScreen } from "@/components/screens/register-screen"
 import { ProfileSettingsScreen } from "@/components/screens/profile-settings-screen"
+import { SettingsScreen } from "@/components/screens/settings-screen"
 import { APDetailSheet } from "@/components/ap-detail-sheet"
 import { RechargeSheet } from "@/components/recharge-sheet"
 import { PurchaseConfirmSheet } from "@/components/purchase-confirm-sheet"
@@ -82,6 +83,21 @@ export default function KonnectikApp() {
     return (
       <MobileShell>
         <ProfileSettingsScreen onBack={() => state.setCurrentScreen("main")} />
+      </MobileShell>
+    )
+  }
+
+  // App settings
+  if (state.currentScreen === "settings") {
+    return (
+      <MobileShell>
+        <SettingsScreen
+          onBack={() => state.setCurrentScreen("main")}
+          onLogout={() => {
+            state.logout()
+            state.setCurrentScreen("main")
+          }}
+        />
       </MobileShell>
     )
   }
@@ -195,7 +211,7 @@ export default function KonnectikApp() {
           referralCode: state.user.referral_code,
         } : null}
         onNavigate={(screen) => {
-          if (screen === "rewards" || screen === "profile") {
+          if (screen === "rewards" || screen === "profile" || screen === "settings" || screen === "help") {
             state.setCurrentScreen(screen)
           }
           state.setMenuOpen(false)

@@ -127,6 +127,17 @@ export function MapScreen({
         </div>
       )}
 
+      {/* Empty state when no APs are available */}
+      {accessPoints.length === 0 && (
+        <div className="absolute inset-x-0 bottom-24 z-500 pointer-events-none flex flex-col items-center px-6">
+          <div className="bg-card/95 backdrop-blur-sm border border-border rounded-2xl p-5 shadow-xl max-w-xs flex flex-col items-center">
+            <img src="/nowifi.png" alt="Aucun K-Zone" className="w-20 h-20 object-contain mb-3 opacity-90" />
+            <p className="text-sm font-medium text-foreground text-center">Aucun K-Zone à proximité</p>
+            <p className="text-xs text-muted-foreground text-center mt-1">Élargissez votre recherche ou revenez plus tard</p>
+          </div>
+        </div>
+      )}
+
       {/* Recenter button */}
       <button
         type="button"

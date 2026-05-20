@@ -22,7 +22,7 @@ export function useAccessPoints() {
       const { data, error } = await supabase
         .from("access_points")
         .select("id, provider_id, zone_label, location, latitude, longitude, ssid, propagation_radius_m, status, avg_rating")
-        .in("status", ["online", "out-of-range", "offline", "maintenance"])
+        .in("status", ["online", "offline", "maintenance"])
       if (error) throw error
       return (data ?? []) as AccessPoint[]
     },

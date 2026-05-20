@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
-import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { Providers } from "@/components/providers"
 import { ServiceWorkerRegister } from "@/components/sw-register"
@@ -37,7 +36,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={`${inter.variable} font-sans antialiased`}>
         <Providers>{children}</Providers>
         <ServiceWorkerRegister />
-        <Analytics />
       </body>
     </html>
   )

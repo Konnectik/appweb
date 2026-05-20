@@ -34,3 +34,8 @@ next-env.d.ts
 # Local audit / SQL outputs (contain DB schema info)
 sql query result/
 *.csv
+
+# Keep only npm — never commit pnpm/bun lockfiles
+pnpm-lock.yaml
+bun.lockb
+bun.lock

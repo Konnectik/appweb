@@ -117,11 +117,11 @@ export function SideMenu({ isOpen, onClose, user, onNavigate, onLogout }: SideMe
         <div className="px-5 pb-4 safe-area-inset-bottom">
           <div className="flex items-center gap-2 opacity-50">
             <Image
-              src="/logo.svg"
+              src="/logo-red.png"
               alt="Konnectik"
               width={20}
               height={20}
-              className="w-5 h-5"
+              className="w-5 h-5 object-contain"
             />
             <span className="text-xs text-muted-foreground">Konnectik v1.0</span>
           </div>

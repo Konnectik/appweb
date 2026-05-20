@@ -1,9 +1,8 @@
 "use client"
 
-import { useEffect, useMemo, useRef } from "react"
+import { useEffect, useMemo } from "react"
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet"
 import L from "leaflet"
-import "leaflet/dist/leaflet.css"
 import type { AccessPoint } from "@/lib/supabase/types"
 
 // --- Icons -----------------------------------------------------------
@@ -85,7 +84,7 @@ export default function LeafletMap({
         zoom={13}
         scrollWheelZoom
         zoomControl={false}
-        style={{ height: "100%", width: "100%" }}
+        style={{ height: "100%", width: "100%", minHeight: 400 }}
       >
         <TileLayer
           attribution='&copy; OpenStreetMap'

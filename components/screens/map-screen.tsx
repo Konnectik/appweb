@@ -46,16 +46,33 @@ export function MapScreen({
   const [recenterTick, setRecenterTick] = useState(0)
   const [geoError, setGeoError] = useState<string | null>(null)
 
-  // Request geolocation once on mount.
+  // Request geolocation once on mount. On HTTPS the browser will prompt.
   useEffect(() => {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
-      setGeoError("Geolocation not supported")
+      setGeoError("Geolocation not supported by this browser")
+      return
+    }
+    if (!window.isSecureContext) {
+      setGeoError("Geolocation requires HTTPS")
       return
     }
     navigator.geolocation.getCurrentPosition(
-      (pos) => setUserLocation([pos.coords.latitude, pos.coords.longitude]),
-      (err) => setGeoError(err.message),
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
+      (pos) => {
+        setUserLocation([pos.coords.latitude, pos.coords.longitude])
+        setGeoError(null)
+      },
+      (err) => {
+        const msg =
+          err.code === err.PERMISSION_DENIED
+            ? "Permission de localisation refusée"
+            : err.code === err.POSITION_UNAVAILABLE
+            ? "Position indisponible"
+            : err.code === err.TIMEOUT
+            ? "Délai de localisation dépassé"
+            : err.message
+        setGeoError(msg)
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
     )
   }, [])
 
@@ -69,7 +86,7 @@ export function MapScreen({
   }
 
   return (
-    <div className="flex-1 relative overflow-hidden">
+    <div className="flex-1 relative overflow-hidden min-h-[400px]" style={{ height: "100%" }}>
       <MapCanvas
         accessPoints={realAPs}
         userLocation={userLocation}

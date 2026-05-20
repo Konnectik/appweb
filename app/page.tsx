@@ -11,6 +11,7 @@ import { NotificationsScreen } from "@/components/screens/notifications-screen"
 import { RewardsScreen } from "@/components/screens/rewards-screen"
 import { LoginScreen } from "@/components/screens/login-screen"
 import { RegisterScreen } from "@/components/screens/register-screen"
+import { ProfileSettingsScreen } from "@/components/screens/profile-settings-screen"
 import { APDetailSheet } from "@/components/ap-detail-sheet"
 import { RechargeSheet } from "@/components/recharge-sheet"
 import { PurchaseConfirmSheet } from "@/components/purchase-confirm-sheet"
@@ -72,6 +73,15 @@ export default function KonnectikApp() {
           }}
           onMarkAllRead={() => state.markAllNotificationsRead()}
         />
+      </MobileShell>
+    )
+  }
+
+  // Profile settings
+  if (state.currentScreen === "profile") {
+    return (
+      <MobileShell>
+        <ProfileSettingsScreen onBack={() => state.setCurrentScreen("main")} />
       </MobileShell>
     )
   }
@@ -185,8 +195,8 @@ export default function KonnectikApp() {
           referralCode: state.user.referral_code,
         } : null}
         onNavigate={(screen) => {
-          if (screen === "rewards") {
-            state.setCurrentScreen("rewards")
+          if (screen === "rewards" || screen === "profile") {
+            state.setCurrentScreen(screen)
           }
           state.setMenuOpen(false)
         }}

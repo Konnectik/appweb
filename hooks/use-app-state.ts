@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect, useMemo } from "react"
+import { toast } from "sonner"
 import { useAuth } from "@/contexts/auth-context"
 import {
   useAccessPoints,
@@ -257,56 +258,64 @@ export function useAppState() {
 
   // -------- Domain actions (edge functions) ---------
 
+  const failAction = useCallback((title: string, e: unknown) => {
+    const msg = (e as Error)?.message || "Unknown error"
+    setActionError(msg)
+    toast.error(title, { description: msg })
+  }, [])
+
   const rechargeWallet = useCallback(async (amount: number, method: "mtn" | "orange") => {
     if (!user) return
     setActionError(null)
     try {
       const phone = user.phone || ""
       if (!phone) {
-        setActionError("Add a phone number to your profile first.")
+        toast.error("Numéro requis", { description: "Ajoutez un numéro de téléphone dans votre profil." })
         return
       }
       await initiateRechargeFn(amount, method === "mtn" ? "momo" : "om", phone)
-      // Confirmation arrives via webhook → wallet realtime will refresh.
+      toast.success("Recharge initiée", { description: "Validez le paiement sur votre téléphone." })
       setShowRechargeSheet(false)
     } catch (e) {
-      setActionError((e as Error).message)
+      failAction("Échec de la recharge", e)
     }
-  }, [user])
+  }, [user, failAction])
 
   const purchaseBundle = useCallback(async (plan: UiPlan, _apId: string) => {
     if (!user) return
     setActionError(null)
     try {
       await purchaseBundleFn(plan.id, `${user.id}-${plan.id}-${Date.now()}`)
-      // user_bundles realtime will refresh; refetch profile for new balance
       await auth.refreshProfile()
+      toast.success("Bundle acheté", { description: plan.name })
       setSelectedAP(null)
       setShowBundlePurchaseConfirm(false)
       setSelectedPlan(null)
     } catch (e) {
-      setActionError((e as Error).message)
+      failAction("Échec de l'achat", e)
     }
-  }, [user, auth])
+  }, [user, auth, failAction])
 
   const startSession = useCallback(async (bundleId: string, ap: UiAP) => {
     setActionError(null)
     try {
       await startSegmentFn(bundleId, ap.id)
+      toast.success("Session démarrée", { description: ap.name })
       setSelectedAP(null)
     } catch (e) {
-      setActionError((e as Error).message)
+      failAction("Impossible de démarrer la session", e)
     }
-  }, [])
+  }, [failAction])
 
   const endSession = useCallback(async (segmentId: string) => {
     setActionError(null)
     try {
       await endSegmentFn(segmentId)
+      toast.success("Session terminée")
     } catch (e) {
-      setActionError((e as Error).message)
+      failAction("Échec de l'arrêt de session", e)
     }
-  }, [])
+  }, [failAction])
 
   const resumeSession = useCallback(async (ap: UiAP) => {
     if (!activeBundle) return

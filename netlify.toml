@@ -1,0 +1,39 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+  # Avoid Netlify auto-installing the wrong package manager flavour
+  NPM_FLAGS = "--legacy-peer-deps"
+
+# The official Next.js plugin handles SSR, ISR, Image Optimization, and edge fns
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Long-cache static assets (the Next.js plugin sets most of these, this is
+# only for the public/ folder fallback).
+[[headers]]
+  for = "/logo-red.png"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/logo-white.png"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Never cache the service worker — it must always be revalidated so a new
+# version of the app can ship.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Service-Worker-Allowed = "/"
+
+# Manifest revalidates on each visit (light file)
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Content-Type = "application/manifest+json"

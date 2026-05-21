@@ -1,6 +1,6 @@
 "use client"
 
-import { X, User, Gift, Users, Settings, HelpCircle, LogOut } from "lucide-react"
+import { X, User, Gift, Users, Settings, HelpCircle, LogOut, Wifi } from "lucide-react"
 import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
@@ -13,12 +13,16 @@ interface SideMenuProps {
     email: string
     avatarUrl?: string
   }
-  onNavigate: (screen: "profile" | "rewards" | "gifts" | "settings" | "help") => void
+  onNavigate: (screen: "profile" | "rewards" | "gifts" | "settings" | "help" | "usage") => void
   onLogout: () => void
+  hasActiveSession?: boolean
 }
 
-export function SideMenu({ isOpen, onClose, user, onNavigate, onLogout }: SideMenuProps) {
+export function SideMenu({ isOpen, onClose, user, onNavigate, onLogout, hasActiveSession }: SideMenuProps) {
   const menuItems = [
+    ...(hasActiveSession
+      ? [{ id: "usage" as const, label: "Session en cours", icon: Wifi, accent: true }]
+      : []),
     { id: "profile" as const, label: "Mon profil", icon: User },
     { id: "rewards" as const, label: "Parrainage", icon: Users },
     { id: "gifts" as const, label: "Cartes cadeaux", icon: Gift },
@@ -29,18 +33,18 @@ export function SideMenu({ isOpen, onClose, user, onNavigate, onLogout }: SideMe
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className={cn(
-          "fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300",
+          "fixed inset-0 bg-black/50 backdrop-blur-sm z-1100 transition-opacity duration-300",
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
         onClick={onClose}
       />
 
       {/* Menu */}
-      <aside 
+      <aside
         className={cn(
-          "fixed top-0 left-0 bottom-0 w-[280px] bg-card z-50 flex flex-col transition-transform duration-300 safe-area-inset-top shadow-2xl",
+          "fixed top-0 left-0 bottom-0 w-[280px] max-w-[85vw] bg-card z-1200 flex flex-col transition-transform duration-300 safe-area-inset-top shadow-2xl",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -82,17 +86,23 @@ export function SideMenu({ isOpen, onClose, user, onNavigate, onLogout }: SideMe
         <nav className="flex-1 py-2">
           {menuItems.map((item) => {
             const Icon = item.icon
+            const isAccent = "accent" in item && item.accent
             return (
               <button
                 key={item.id}
+                type="button"
                 onClick={() => {
                   onNavigate(item.id)
                   onClose()
                 }}
-                className="w-full flex items-center gap-3 px-5 py-3 hover:bg-muted transition-colors text-left"
+                className={cn(
+                  "w-full flex items-center gap-3 px-5 py-3 transition-colors text-left",
+                  isAccent ? "bg-primary/10 hover:bg-primary/15" : "hover:bg-muted"
+                )}
               >
-                <Icon className="w-5 h-5 text-muted-foreground" />
-                <span className="text-foreground font-medium">{item.label}</span>
+                <Icon className={cn("w-5 h-5", isAccent ? "text-primary" : "text-muted-foreground")} />
+                <span className={cn("font-medium flex-1", isAccent ? "text-primary" : "text-foreground")}>{item.label}</span>
+                {isAccent && <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
               </button>
             )
           })}

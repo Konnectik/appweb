@@ -301,6 +301,7 @@ export default function KonnectikApp() {
       <SideMenu
         isOpen={state.menuOpen}
         onClose={() => state.setMenuOpen(false)}
+        hasActiveSession={!!state.activeSegment}
         user={state.user ? {
           name: state.user.full_name,
           email: state.user.email,
@@ -313,7 +314,8 @@ export default function KonnectikApp() {
             screen === "profile" ||
             screen === "settings" ||
             screen === "help" ||
-            screen === "gifts"
+            screen === "gifts" ||
+            screen === "usage"
           ) {
             state.setCurrentScreen(screen)
           }

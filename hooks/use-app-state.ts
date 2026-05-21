@@ -237,19 +237,40 @@ export function useAppState() {
     if (error) setAuthError(error)
   }, [auth])
 
-  const register = useCallback(async (data: { name: string; email: string; phone?: string; password: string; referralCode?: string }) => {
+  const register = useCallback(async (data: {
+    name: string
+    email: string
+    phone?: string
+    password: string
+    date_of_birth?: string
+    gender?: string
+    terms_agreed?: boolean
+    referralCode?: string
+  }) => {
     setAuthBusy(true); setAuthError(null)
     const { error } = await auth.signUp({
       email: data.email,
       password: data.password,
       full_name: data.name,
       phone: data.phone,
+      date_of_birth: data.date_of_birth,
+      gender: data.gender,
+      terms_agreed: data.terms_agreed,
       referral_code: data.referralCode,
     })
     setAuthBusy(false)
     if (error) setAuthError(error)
     else setCurrentScreen("main")
   }, [auth])
+
+  // Profile completeness — used to route Google sign-ins (and stale users) to
+  // the complete-profile screen if required fields are missing.
+  const profileComplete = useMemo(() => {
+    if (!auth.session) return true // n'a pas d'importance si pas connecté
+    const p = auth.profile
+    if (!p) return false
+    return !!(p.phone && p.date_of_birth && p.terms_agreed_at)
+  }, [auth.session, auth.profile])
 
   const logout = useCallback(async () => {
     await auth.signOut()
@@ -348,6 +369,7 @@ export function useAppState() {
     transactions,
     notifications,
     referralStats: mockReferralStats,
+    profileComplete,
     activeBundle,
     activeSegment,
     remainingMinutes,

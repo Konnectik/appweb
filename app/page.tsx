@@ -17,6 +17,7 @@ import { SplashScreen } from "@/components/screens/splash-screen"
 import { BundlesScreen } from "@/components/screens/bundles-screen"
 import { UsageScreen } from "@/components/screens/usage-screen"
 import { GiftCardsScreen } from "@/components/screens/gift-cards-screen"
+import { CompleteProfileScreen } from "@/components/screens/complete-profile-screen"
 import { APDetailSheet } from "@/components/ap-detail-sheet"
 import { RechargeSheet } from "@/components/recharge-sheet"
 import { PurchaseConfirmSheet } from "@/components/purchase-confirm-sheet"
@@ -56,6 +57,15 @@ export default function KonnectikApp() {
           busy={state.authBusy}
           error={state.authError}
         />
+      </MobileShell>
+    )
+  }
+
+  // Force completion of profile for OAuth (Google) or any user missing required fields
+  if (!state.profileComplete) {
+    return (
+      <MobileShell>
+        <CompleteProfileScreen onDone={() => state.setCurrentScreen("main")} />
       </MobileShell>
     )
   }

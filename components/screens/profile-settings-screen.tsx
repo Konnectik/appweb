@@ -28,6 +28,8 @@ export function ProfileSettingsScreen({ onBack }: ProfileSettingsScreenProps) {
   const [fullName, setFullName] = useState(profile?.full_name ?? "")
   const [phone, setPhone] = useState(profile?.phone ?? "")
   const [address, setAddress] = useState(profile?.address ?? "")
+  const [dob, setDob] = useState(profile?.date_of_birth ?? "")
+  const [gender, setGender] = useState(profile?.gender ?? "")
   const [saving, setSaving] = useState(false)
 
   if (!user) return null
@@ -39,6 +41,8 @@ export function ProfileSettingsScreen({ onBack }: ProfileSettingsScreenProps) {
     const updates: Record<string, string | null> = {
       full_name: fullName.trim() || profile?.full_name || "",
       address: address.trim() || null,
+      date_of_birth: dob || null,
+      gender: gender || null,
     }
 
     if (phone.trim()) {
@@ -116,6 +120,41 @@ export function ProfileSettingsScreen({ onBack }: ProfileSettingsScreenProps) {
               autoComplete="tel"
               inputMode="tel"
             />
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="dob">Date de naissance</FieldLabel>
+            <Input
+              id="dob"
+              type="date"
+              value={dob}
+              onChange={(e) => setDob(e.target.value)}
+              className="h-12"
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="gender">Genre</FieldLabel>
+            <div className="flex gap-2">
+              {[
+                { value: "male", label: "Homme" },
+                { value: "female", label: "Femme" },
+                { value: "other", label: "Autre" },
+              ].map((g) => (
+                <button
+                  key={g.value}
+                  type="button"
+                  onClick={() => setGender(g.value)}
+                  className={`flex-1 h-11 rounded-md border-2 text-sm font-medium transition-colors ${
+                    gender === g.value
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-muted/40 text-muted-foreground hover:border-muted-foreground"
+                  }`}
+                >
+                  {g.label}
+                </button>
+              ))}
+            </div>
           </Field>
 
           <Field>

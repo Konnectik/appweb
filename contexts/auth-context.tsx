@@ -11,7 +11,16 @@ interface AuthContextValue {
   profile: Profile | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
-  signUp: (data: { email: string; password: string; full_name: string; phone?: string; referral_code?: string }) => Promise<{ error: string | null }>
+  signUp: (data: {
+    email: string
+    password: string
+    full_name: string
+    phone?: string
+    date_of_birth?: string // YYYY-MM-DD
+    gender?: string
+    terms_agreed?: boolean
+    referral_code?: string
+  }) => Promise<{ error: string | null }>
   signInWithGoogle: () => Promise<{ error: string | null }>
   signOut: () => Promise<void>
   refreshProfile: () => Promise<void>
@@ -56,20 +65,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error?.message ?? null }
   }, [])
 
-  const signUp = useCallback(async (data: { email: string; password: string; full_name: string; phone?: string; referral_code?: string }) => {
-    const { error } = await supabase.auth.signUp({
-      email: data.email,
-      password: data.password,
-      options: {
-        data: {
-          full_name: data.full_name,
-          phone: data.phone ?? null,
-          referral_code: data.referral_code ?? null,
+  const signUp = useCallback(
+    async (data: {
+      email: string
+      password: string
+      full_name: string
+      phone?: string
+      date_of_birth?: string
+      gender?: string
+      terms_agreed?: boolean
+      referral_code?: string
+    }) => {
+      const { data: signUpData, error } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            full_name: data.full_name,
+            phone: data.phone ?? null,
+            referral_code: data.referral_code ?? null,
+          },
         },
-      },
-    })
-    return { error: error?.message ?? null }
-  }, [])
+      })
+      if (error) return { error: error.message }
+
+      // Update profile with the extra fields the trigger didn't capture.
+      // (Trigger handle_new_user reads only basic fields from auth.users user_metadata.)
+      const userId = signUpData.user?.id
+      if (userId) {
+        const updates: Record<string, string | null> = {}
+        if (data.phone) updates.phone = data.phone
+        if (data.date_of_birth) updates.date_of_birth = data.date_of_birth
+        if (data.gender) updates.gender = data.gender
+        if (data.terms_agreed) updates.terms_agreed_at = new Date().toISOString()
+
+        if (Object.keys(updates).length > 0) {
+          // RLS allows the user to update their own profile.
+          await supabase.from("profiles").update(updates).eq("id", userId)
+        }
+      }
+      return { error: null }
+    },
+    []
+  )
 
   const signInWithGoogle = useCallback(async () => {
     const { error } = await supabase.auth.signInWithOAuth({

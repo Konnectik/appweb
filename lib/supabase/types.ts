@@ -18,7 +18,12 @@ export interface Profile {
   full_name: string
   email: string
   phone: string | null
+  address: string | null
+  company: string | null
   avatar_url: string | null
+  gender: string | null
+  date_of_birth: string | null // YYYY-MM-DD
+  terms_agreed_at: string | null
   wallet_balance_xaf: number
   referral_code: string | null
   referred_by: string | null

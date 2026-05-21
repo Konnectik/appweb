@@ -11,6 +11,7 @@ import type {
   SessionSegment,
   WalletTransaction,
   AppNotification,
+  GiftCredit,
 } from "./types"
 
 // --- Access points (public; readable by all signed-in users) ------------------
@@ -183,6 +184,44 @@ export function useNotifications() {
         "postgres_changes",
         { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
         () => qc.invalidateQueries({ queryKey: ["notifications", user.id] })
+      )
+      .subscribe()
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user, qc])
+
+  return query
+}
+
+// --- Gift credits -------------------------------------------------------------
+
+export function useGiftCredits() {
+  const { user } = useAuth()
+  const qc = useQueryClient()
+
+  const query = useQuery({
+    queryKey: ["gift-credits", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("gift_credits")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("granted_at", { ascending: false })
+      if (error) throw error
+      return (data ?? []) as GiftCredit[]
+    },
+  })
+
+  useEffect(() => {
+    if (!user) return
+    const channel = supabase
+      .channel(`gifts:${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "gift_credits", filter: `user_id=eq.${user.id}` },
+        () => qc.invalidateQueries({ queryKey: ["gift-credits", user.id] })
       )
       .subscribe()
     return () => {

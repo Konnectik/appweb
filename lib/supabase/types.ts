@@ -88,6 +88,19 @@ export interface WalletTransaction {
   created_at: string
 }
 
+export type GiftCreditType = "first_time" | "monthly" | "referral"
+
+export interface GiftCredit {
+  id: string
+  user_id: string
+  type: GiftCreditType
+  minutes_total: number
+  minutes_remaining: number
+  granted_at: string
+  expires_at: string | null
+  exhausted_at: string | null
+}
+
 export interface AppNotification {
   id: string
   user_id: string

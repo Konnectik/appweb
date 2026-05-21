@@ -1,6 +1,6 @@
 "use client"
 
-import { X, User, Gift, Settings, HelpCircle, LogOut } from "lucide-react"
+import { X, User, Gift, Users, Settings, HelpCircle, LogOut } from "lucide-react"
 import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
@@ -13,16 +13,17 @@ interface SideMenuProps {
     email: string
     avatarUrl?: string
   }
-  onNavigate: (screen: "profile" | "rewards" | "settings" | "help") => void
+  onNavigate: (screen: "profile" | "rewards" | "gifts" | "settings" | "help") => void
   onLogout: () => void
 }
 
 export function SideMenu({ isOpen, onClose, user, onNavigate, onLogout }: SideMenuProps) {
   const menuItems = [
-    { id: "profile" as const, label: "My Profile", icon: User },
-    { id: "rewards" as const, label: "Rewards & Gifts", icon: Gift },
-    { id: "settings" as const, label: "Settings", icon: Settings },
-    { id: "help" as const, label: "Help & Support", icon: HelpCircle },
+    { id: "profile" as const, label: "Mon profil", icon: User },
+    { id: "rewards" as const, label: "Parrainage", icon: Users },
+    { id: "gifts" as const, label: "Cartes cadeaux", icon: Gift },
+    { id: "settings" as const, label: "Paramètres", icon: Settings },
+    { id: "help" as const, label: "Aide & support", icon: HelpCircle },
   ]
 
   return (

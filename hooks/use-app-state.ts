@@ -37,7 +37,7 @@ import type {
 } from "@/lib/mock-data"
 import { mockReferralStats, computeBundleRemainingMinutes, getActiveBundle, getActiveSegment } from "@/lib/mock-data"
 
-export type Screen = "main" | "notifications" | "rewards" | "profile" | "settings" | "help" | "login" | "register" | "bundles"
+export type Screen = "main" | "notifications" | "rewards" | "profile" | "settings" | "help" | "login" | "register" | "bundles" | "usage" | "gifts"
 export type TabId = "wallet" | "map" | "sessions"
 
 // --- DB → UI mapping --------------------------------------------------------

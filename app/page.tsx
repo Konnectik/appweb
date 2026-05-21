@@ -15,6 +15,8 @@ import { ProfileSettingsScreen } from "@/components/screens/profile-settings-scr
 import { SettingsScreen } from "@/components/screens/settings-screen"
 import { SplashScreen } from "@/components/screens/splash-screen"
 import { BundlesScreen } from "@/components/screens/bundles-screen"
+import { UsageScreen } from "@/components/screens/usage-screen"
+import { GiftCardsScreen } from "@/components/screens/gift-cards-screen"
 import { APDetailSheet } from "@/components/ap-detail-sheet"
 import { RechargeSheet } from "@/components/recharge-sheet"
 import { PurchaseConfirmSheet } from "@/components/purchase-confirm-sheet"
@@ -136,6 +138,30 @@ export default function KonnectikApp() {
     )
   }
 
+  // Usage (active session full screen)
+  if (state.currentScreen === "usage") {
+    return (
+      <MobileShell>
+        <UsageScreen
+          activeSegment={state.activeSegment}
+          remainingMinutes={state.remainingMinutes}
+          sessionTimer={state.sessionTimer}
+          onBack={() => state.setCurrentScreen("main")}
+          onDisconnect={(id) => state.endSession(id)}
+        />
+      </MobileShell>
+    )
+  }
+
+  // Gift cards
+  if (state.currentScreen === "gifts") {
+    return (
+      <MobileShell>
+        <GiftCardsScreen onBack={() => state.setCurrentScreen("main")} />
+      </MobileShell>
+    )
+  }
+
   // App settings
   if (state.currentScreen === "settings") {
     return (
@@ -196,14 +222,32 @@ export default function KonnectikApp() {
         )}
 
         {state.activeTab === "sessions" && (
-          <SessionsScreen
-            bundles={state.bundles}
-            segments={state.segments}
-            activeSegment={state.activeSegment}
-            sessionTimer={state.sessionTimer}
-            onDisconnect={(segmentId) => state.endSession(segmentId)}
-            onBuyBundle={() => state.setActiveTab("map")}
-          />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {state.activeSegment && (
+              <button
+                type="button"
+                onClick={() => state.setCurrentScreen("usage")}
+                className="mx-4 mt-3 mb-1 p-3 rounded-xl bg-primary text-primary-foreground flex items-center justify-between shadow-md hover:shadow-lg transition-shadow active:scale-[0.98]"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-2 h-2 rounded-full bg-white animate-pulse shrink-0" />
+                  <div className="text-left min-w-0">
+                    <p className="text-xs opacity-90">Session active</p>
+                    <p className="text-sm font-semibold truncate">{state.activeSegment.ap_name || "K-Zone"}</p>
+                  </div>
+                </div>
+                <span className="text-xs font-medium bg-white/20 px-3 py-1.5 rounded-full shrink-0">Voir live →</span>
+              </button>
+            )}
+            <SessionsScreen
+              bundles={state.bundles}
+              segments={state.segments}
+              activeSegment={state.activeSegment}
+              sessionTimer={state.sessionTimer}
+              onDisconnect={(segmentId) => state.endSession(segmentId)}
+              onBuyBundle={() => state.setActiveTab("map")}
+            />
+          </div>
         )}
 
         {state.activeTab === "wallet" && (
@@ -264,7 +308,13 @@ export default function KonnectikApp() {
           referralCode: state.user.referral_code,
         } : null}
         onNavigate={(screen) => {
-          if (screen === "rewards" || screen === "profile" || screen === "settings" || screen === "help") {
+          if (
+            screen === "rewards" ||
+            screen === "profile" ||
+            screen === "settings" ||
+            screen === "help" ||
+            screen === "gifts"
+          ) {
             state.setCurrentScreen(screen)
           }
           state.setMenuOpen(false)

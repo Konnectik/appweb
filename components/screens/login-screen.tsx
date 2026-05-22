@@ -28,9 +28,9 @@ export function LoginScreen({ onLogin, onGoogleLogin, onRegister, onForgotPasswo
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col overflow-y-auto">
       {/* Logo Section */}
-      <div className="flex-1 flex flex-col items-center justify-center px-8 pt-12 pb-8">
+      <div className="flex flex-col items-center justify-center px-8 pt-8 pb-4 sm:flex-1 sm:pt-12 sm:pb-8">
         <Image
           src="/logo-red.png"
           alt="Konnectik"
@@ -138,7 +138,7 @@ export function LoginScreen({ onLogin, onGoogleLogin, onRegister, onForgotPasswo
           Continue with Google
         </Button>
 
-        <p className="text-center text-sm text-muted-foreground mt-8">
+        <p className="text-center text-sm text-muted-foreground mt-6 pb-4">
           {"Don't have an account? "}
           <button
             type="button"

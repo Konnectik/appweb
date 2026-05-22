@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect, useMemo } from "react"
+import { useState, useCallback, useEffect, useMemo, useRef } from "react"
 import { toast } from "sonner"
 import { useAuth } from "@/contexts/auth-context"
 import {
@@ -302,11 +302,17 @@ export function useAppState() {
     }
   }, [user, failAction])
 
+  const purchaseInFlightRef = useRef(false)
   const purchaseBundle = useCallback(async (plan: UiPlan, _apId: string) => {
     if (!user) return
+    if (purchaseInFlightRef.current) return
+    purchaseInFlightRef.current = true
     setActionError(null)
     try {
-      await purchaseBundleFn(plan.id, `${user.id}-${plan.id}-${Date.now()}`)
+      // Stable idempotency key per click intent: bucketed to 10s window so
+      // accidental double-taps collide on the backend and only one debit happens.
+      const bucket = Math.floor(Date.now() / 10000)
+      await purchaseBundleFn(plan.id, `${user.id}-${plan.id}-${bucket}`)
       await auth.refreshProfile()
       toast.success("Bundle acheté", { description: plan.name })
       setSelectedAP(null)
@@ -314,6 +320,8 @@ export function useAppState() {
       setSelectedPlan(null)
     } catch (e) {
       failAction("Échec de l'achat", e)
+    } finally {
+      purchaseInFlightRef.current = false
     }
   }, [user, auth, failAction])
 

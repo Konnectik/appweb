@@ -119,14 +119,28 @@ export default function LeafletMap({
           const pos: [number, number] = [ap.latitude as number, ap.longitude as number]
           return (
             <div key={ap.id}>
+              {/* Real coverage (geographic) — uses the actual propagation radius */}
               <Circle
                 center={pos}
                 radius={ap.propagation_radius_m ?? 50}
                 pathOptions={{
                   color: isActive ? "#E42320" : ap.status === "online" ? "#22C55E" : "#94A3B8",
                   fillColor: isActive ? "#E42320" : ap.status === "online" ? "#22C55E" : "#94A3B8",
-                  fillOpacity: 0.08,
+                  fillOpacity: 0.18,
+                  weight: 2,
+                  dashArray: "4 4",
+                }}
+              />
+              {/* Visual halo — ensures the K-Zone is still visible when zoomed out */}
+              <Circle
+                center={pos}
+                radius={Math.max(ap.propagation_radius_m ?? 50, 250)}
+                pathOptions={{
+                  color: isActive ? "#E42320" : ap.status === "online" ? "#22C55E" : "#94A3B8",
+                  fillColor: isActive ? "#E42320" : ap.status === "online" ? "#22C55E" : "#94A3B8",
+                  fillOpacity: 0.06,
                   weight: 1,
+                  opacity: 0.5,
                 }}
               />
               <Marker

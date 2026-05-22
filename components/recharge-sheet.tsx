@@ -21,7 +21,7 @@ export function RechargeSheet({ onClose, onRecharge, userPhone }: RechargeSheetP
   const [phone, setPhone] = useState(userPhone || "")
 
   const fee = Math.ceil(amount * 0.05)
-  const net = amount - fee
+  const totalToCharge = amount + fee
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -136,22 +136,22 @@ export function RechargeSheet({ onClose, onRecharge, userPhone }: RechargeSheetP
           {/* Fee breakdown */}
           <div className="mt-6 p-4 bg-muted rounded-xl">
             <div className="flex justify-between text-sm mb-2">
-              <span className="text-muted-foreground">Amount</span>
+              <span className="text-muted-foreground">Montant crédité au wallet</span>
               <span className="text-foreground">{amount.toLocaleString()} XAF</span>
             </div>
             <div className="flex justify-between text-sm mb-2">
-              <span className="text-muted-foreground">Service fee (5%)</span>
-              <span className="text-foreground">-{fee.toLocaleString()} XAF</span>
+              <span className="text-muted-foreground">Frais de service (5%)</span>
+              <span className="text-foreground">+{fee.toLocaleString()} XAF</span>
             </div>
             <div className="border-t border-border my-2" />
             <div className="flex justify-between text-base font-semibold">
-              <span className="text-foreground">You receive</span>
-              <span className="text-[#22C55E]">{net.toLocaleString()} XAF</span>
+              <span className="text-foreground">Vous payez</span>
+              <span className="text-primary">{totalToCharge.toLocaleString()} XAF</span>
             </div>
           </div>
 
           <Button type="submit" className="w-full h-12 mt-6" disabled={!phone || amount < 200}>
-            Recharge {amount.toLocaleString()} XAF
+            Payer {totalToCharge.toLocaleString()} XAF
           </Button>
         </form>
       </div>

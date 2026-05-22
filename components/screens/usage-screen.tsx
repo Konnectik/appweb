@@ -48,7 +48,7 @@ export function UsageScreen({
 
   if (!activeSegment) {
     return (
-      <div className="h-dvh bg-background flex flex-col">
+      <div className="h-dvh bg-background flex flex-col pt-[env(safe-area-inset-top)]">
         <header className="flex items-center h-14 px-2 shrink-0 border-b border-border bg-card">
           <button
             type="button"
@@ -83,7 +83,7 @@ export function UsageScreen({
   }
 
   return (
-    <div className="h-dvh bg-background flex flex-col">
+    <div className="h-dvh bg-background flex flex-col pt-[env(safe-area-inset-top)]">
       <header className="flex items-center h-14 px-2 shrink-0 border-b border-border bg-card">
         <button
           type="button"

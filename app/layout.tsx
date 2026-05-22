@@ -3,6 +3,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { Providers } from "@/components/providers"
 import { ServiceWorkerRegister } from "@/components/sw-register"
+import { InstallPrompt } from "@/components/install-prompt"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={`${inter.variable} font-sans antialiased`}>
         <Providers>{children}</Providers>
         <ServiceWorkerRegister />
+        <InstallPrompt />
       </body>
     </html>
   )

@@ -29,7 +29,7 @@ export function RechargeSheet({ onClose, onRecharge, userPhone }: RechargeSheetP
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col">
+    <div className="fixed inset-0 z-1100 flex flex-col">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       

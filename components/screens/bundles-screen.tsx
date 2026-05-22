@@ -41,7 +41,7 @@ export function BundlesScreen({
   const rating = (ap.rating ?? ap.avg_rating ?? 0) as number
 
   return (
-    <div className="h-dvh bg-background flex flex-col">
+    <div className="h-dvh bg-background flex flex-col pt-[env(safe-area-inset-top)]">
       {/* Header */}
       <header className="flex items-center h-14 px-2 shrink-0 border-b border-border bg-card relative z-1000">
         <button

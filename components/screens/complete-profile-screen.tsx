@@ -73,7 +73,7 @@ export function CompleteProfileScreen({ onDone }: CompleteProfileScreenProps) {
   }
 
   return (
-    <div className="min-h-screen h-dvh bg-background flex flex-col">
+    <div className="min-h-screen h-dvh bg-background flex flex-col pt-[env(safe-area-inset-top)]">
       <header className="flex items-center h-14 px-5 safe-area-inset-top border-b border-border">
         <h1 className="text-lg font-semibold">Compléter votre profil</h1>
       </header>

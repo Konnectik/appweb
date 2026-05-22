@@ -89,9 +89,9 @@ export function RegisterScreen({
   }
 
   return (
-    <div className="min-h-screen bg-muted/40 flex flex-col">
+    <div className="min-h-screen bg-muted/40 flex flex-col pt-[env(safe-area-inset-top)]">
       {/* Top bar */}
-      <header className="flex items-center h-14 px-2 safe-area-inset-top">
+      <header className="flex items-center h-14 px-2 shrink-0">
         <button
           type="button"
           onClick={onBack}

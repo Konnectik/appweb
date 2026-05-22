@@ -23,7 +23,7 @@ export function PurchaseConfirmSheet({
   const isFree = plan.price_xaf === 0
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
+    <div className="fixed inset-0 z-1100 flex items-end justify-center">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"

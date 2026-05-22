@@ -34,7 +34,7 @@ export function RechargeSheet({ onClose, onRecharge, userPhone }: RechargeSheetP
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       
       {/* Sheet */}
-      <div className="mt-auto bg-card rounded-t-2xl relative z-10 animate-in slide-in-from-bottom duration-300 max-h-[85vh] overflow-hidden flex flex-col">
+      <div className="mt-auto bg-card rounded-t-2xl relative z-10 animate-in slide-in-from-bottom duration-300 max-h-[85dvh] overflow-hidden flex flex-col pb-[env(safe-area-inset-bottom)]">
         {/* Handle bar */}
         <div className="flex justify-center pt-3 pb-2">
           <div className="w-10 h-1 rounded-full bg-muted" />
@@ -52,7 +52,8 @@ export function RechargeSheet({ onClose, onRecharge, userPhone }: RechargeSheetP
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-5 pb-5">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 overflow-y-auto px-5 pb-4">
           <FieldGroup>
             {/* Amount */}
             <Field>
@@ -150,9 +151,13 @@ export function RechargeSheet({ onClose, onRecharge, userPhone }: RechargeSheetP
             </div>
           </div>
 
-          <Button type="submit" className="w-full h-12 mt-6" disabled={!phone || amount < 200}>
-            Payer {totalToCharge.toLocaleString()} XAF
-          </Button>
+          </div>
+
+          <div className="px-5 pt-3 pb-4 border-t border-border bg-card">
+            <Button type="submit" className="w-full h-12" disabled={!phone || amount < 200}>
+              Payer {totalToCharge.toLocaleString()} XAF
+            </Button>
+          </div>
         </form>
       </div>
     </div>

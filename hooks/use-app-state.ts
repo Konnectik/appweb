@@ -182,6 +182,16 @@ export function useAppState() {
   const [selectedPlan, setSelectedPlan] = useState<UiPlan | null>(null)
   const [sessionTimer, setSessionTimer] = useState(0)
 
+  // --- Recharge progress (live status from initiate-recharge → webhook) ---
+  type PendingRecharge = {
+    transactionId: string
+    amountXaf: number
+    method: "mtn" | "orange"
+    startedAt: number
+    status: "initiating" | "awaiting_ussd" | "confirmed" | "failed" | "timeout"
+  }
+  const [pendingRecharge, setPendingRecharge] = useState<PendingRecharge | null>(null)
+
   // Computed
   const activeBundle = getActiveBundle(bundles)
   const activeSegment = getActiveSegment(segments)
@@ -288,19 +298,88 @@ export function useAppState() {
   const rechargeWallet = useCallback(async (amount: number, method: "mtn" | "orange") => {
     if (!user) return
     setActionError(null)
-    try {
-      const phone = user.phone || ""
-      if (!phone) {
-        toast.error("Numéro requis", { description: "Ajoutez un numéro de téléphone dans votre profil." })
-        return
+    const scheduleRefreshes = () => {
+      for (const delay of [5000, 15000, 30000, 60000]) {
+        setTimeout(() => { auth.refreshProfile() }, delay)
       }
-      await initiateRechargeFn(amount, method === "mtn" ? "momo" : "om", phone)
-      toast.success("Recharge initiée", { description: "Validez le paiement sur votre téléphone." })
-      setShowRechargeSheet(false)
+    }
+    const phone = user.phone || ""
+    if (!phone) {
+      toast.error("Numéro requis", { description: "Ajoutez un numéro de téléphone dans votre profil." })
+      return
+    }
+    setShowRechargeSheet(false)
+    setPendingRecharge({
+      transactionId: "",
+      amountXaf: amount,
+      method,
+      startedAt: Date.now(),
+      status: "initiating",
+    })
+    try {
+      const res = await initiateRechargeFn(amount, method === "mtn" ? "momo" : "om", phone)
+      setPendingRecharge((prev) => prev ? {
+        ...prev,
+        transactionId: res.transaction_id,
+        status: "awaiting_ussd",
+      } : null)
+      scheduleRefreshes()
     } catch (e) {
+      setPendingRecharge((prev) => prev ? { ...prev, status: "failed" } : null)
       failAction("Échec de la recharge", e)
     }
-  }, [user, failAction])
+  }, [user, auth, failAction])
+
+  // Watch the transactions cache for the pending recharge's lifecycle.
+  useEffect(() => {
+    if (!pendingRecharge?.transactionId) return
+    if (pendingRecharge.status === "confirmed" || pendingRecharge.status === "failed") return
+    const tx = transactions.find((t) => t.id === pendingRecharge.transactionId)
+    if (!tx) return
+    if (tx.status === "confirmed") {
+      setPendingRecharge((prev) => prev ? { ...prev, status: "confirmed" } : null)
+      auth.refreshProfile()
+      toast.success("Recharge confirmée", {
+        description: `${pendingRecharge.amountXaf.toLocaleString()} XAF crédités`,
+      })
+    } else if (tx.status === "failed") {
+      setPendingRecharge((prev) => prev ? { ...prev, status: "failed" } : null)
+      toast.error("Recharge échouée", { description: "Aucun montant n'a été débité." })
+    }
+  }, [transactions, pendingRecharge, auth])
+
+  // Timeout — 3 min after init, if still pending, surface that.
+  useEffect(() => {
+    if (!pendingRecharge) return
+    if (pendingRecharge.status !== "awaiting_ussd" && pendingRecharge.status !== "initiating") return
+    const elapsed = Date.now() - pendingRecharge.startedAt
+    const remaining = 3 * 60 * 1000 - elapsed
+    if (remaining <= 0) {
+      setPendingRecharge((prev) => prev ? { ...prev, status: "timeout" } : null)
+      return
+    }
+    const id = setTimeout(() => {
+      setPendingRecharge((prev) => {
+        if (!prev) return null
+        if (prev.status === "awaiting_ussd" || prev.status === "initiating") {
+          return { ...prev, status: "timeout" }
+        }
+        return prev
+      })
+    }, remaining)
+    return () => clearTimeout(id)
+  }, [pendingRecharge])
+
+  const closePendingRecharge = useCallback(() => {
+    setPendingRecharge(null)
+  }, [])
+
+  const retryPendingRecharge = useCallback(() => {
+    if (!pendingRecharge) return
+    const { amountXaf, method } = pendingRecharge
+    setPendingRecharge(null)
+    rechargeWallet(amountXaf, method)
+  }, [pendingRecharge, rechargeWallet])
 
   const purchaseInFlightRef = useRef(false)
   const purchaseBundle = useCallback(async (plan: UiPlan, _apId: string) => {
@@ -411,6 +490,11 @@ export function useAppState() {
     setShowRechargeSheet,
     setShowBundlePurchaseConfirm,
     setSelectedPlan,
+
+    // Recharge progress
+    pendingRecharge,
+    closePendingRecharge,
+    retryPendingRecharge,
 
     // Domain actions
     rechargeWallet,

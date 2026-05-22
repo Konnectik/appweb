@@ -20,6 +20,7 @@ import { GiftCardsScreen } from "@/components/screens/gift-cards-screen"
 import { CompleteProfileScreen } from "@/components/screens/complete-profile-screen"
 import { APDetailSheet } from "@/components/ap-detail-sheet"
 import { RechargeSheet } from "@/components/recharge-sheet"
+import { RechargeProgressModal } from "@/components/recharge-progress-modal"
 import { PurchaseConfirmSheet } from "@/components/purchase-confirm-sheet"
 import { useAppState } from "@/hooks/use-app-state"
 
@@ -144,6 +145,15 @@ export default function KonnectikApp() {
             userPhone={state.user?.phone || ""}
           />
         )}
+        <RechargeProgressModal
+          open={!!state.pendingRecharge}
+          status={state.pendingRecharge?.status ?? "initiating"}
+          amountXaf={state.pendingRecharge?.amountXaf ?? 0}
+          method={state.pendingRecharge?.method ?? "mtn"}
+          startedAt={state.pendingRecharge?.startedAt ?? null}
+          onClose={state.closePendingRecharge}
+          onRetry={state.retryPendingRecharge}
+        />
       </MobileShell>
     )
   }
@@ -345,6 +355,17 @@ export default function KonnectikApp() {
           userPhone={state.user?.phone || ""}
         />
       )}
+
+      {/* Recharge Progress Modal — drives the user through init / USSD / confirmed / failed / timeout */}
+      <RechargeProgressModal
+        open={!!state.pendingRecharge}
+        status={state.pendingRecharge?.status ?? "initiating"}
+        amountXaf={state.pendingRecharge?.amountXaf ?? 0}
+        method={state.pendingRecharge?.method ?? "mtn"}
+        startedAt={state.pendingRecharge?.startedAt ?? null}
+        onClose={state.closePendingRecharge}
+        onRetry={state.retryPendingRecharge}
+      />
 
       {/* Purchase Confirm Sheet */}
       {state.showBundlePurchaseConfirm && state.selectedPlan && state.selectedAP && (

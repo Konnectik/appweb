@@ -60,6 +60,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => sub.subscription.unsubscribe()
   }, [loadProfile])
 
+  // Realtime subscription on the current user's profile row so the wallet
+  // balance (and any other profile fields) stay in sync after server-side
+  // updates (recharge webhook, admin tweaks, etc.). Without this the UI shows
+  // a stale balance and users get confused about which recharge credited.
+  useEffect(() => {
+    const userId = session?.user?.id
+    if (!userId) return
+    const channel = supabase
+      .channel(`profile:${userId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${userId}` },
+        (payload) => {
+          if (payload.new) setProfile(payload.new as Profile)
+        }
+      )
+      .subscribe()
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [session?.user?.id])
+
   const signIn = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     return { error: error?.message ?? null }

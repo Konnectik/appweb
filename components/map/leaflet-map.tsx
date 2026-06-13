@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo } from "react"
+import { Fragment, useEffect } from "react"
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet"
 import L from "leaflet"
 import type { AccessPoint } from "@/lib/supabase/types"
@@ -52,11 +52,12 @@ function userLocationIcon() {
 
 // --- Recenter button hook -------------------------------------------
 
-function FlyToOnChange({ center }: { center: [number, number] | null }) {
+function FlyToOnChange({ center, trigger }: { center: [number, number] | null; trigger?: number }) {
   const map = useMap()
   useEffect(() => {
     if (center) map.flyTo(center, 14, { duration: 0.8 })
-  }, [center, map])
+    // Re-runs when center coords OR trigger increments (recenter button).
+  }, [center?.[0], center?.[1], trigger, map])
   return null
 }
 
@@ -79,10 +80,12 @@ export default function LeafletMap({
   onAPAccess,
   recenterTrigger,
 }: LeafletMapProps) {
-  // Default center: Yaoundé (Cameroon) — adjust as needed.
+  // Default center: Yaoundé (Cameroon) — used only as the initial mount value
+  // while we wait for the user's geoloc fix, or when geoloc is denied.
+  // `MapContainer.center` is read once on mount; FlyToOnChange below handles
+  // every subsequent recenter.
   const DEFAULT_CENTER: [number, number] = [3.848, 11.502]
   const center = userLocation ?? DEFAULT_CENTER
-  const flyTarget = useMemo(() => (recenterTrigger ? userLocation : null), [recenterTrigger, userLocation])
 
   const validAPs = accessPoints.filter(
     (ap) => typeof ap.latitude === "number" && typeof ap.longitude === "number"
@@ -118,7 +121,7 @@ export default function LeafletMap({
               : ICON_ONLINE()
           const pos: [number, number] = [ap.latitude as number, ap.longitude as number]
           return (
-            <div key={ap.id}>
+            <Fragment key={ap.id}>
               {/* Real coverage (geographic) — uses the actual propagation radius */}
               <Circle
                 center={pos}
@@ -180,11 +183,11 @@ export default function LeafletMap({
                   </div>
                 </Popup>
               </Marker>
-            </div>
+            </Fragment>
           )
         })}
 
-        <FlyToOnChange center={flyTarget} />
+        <FlyToOnChange center={userLocation} trigger={recenterTrigger} />
       </MapContainer>
     </>
   )

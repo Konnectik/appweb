@@ -382,16 +382,32 @@ export function useAppState() {
   }, [pendingRecharge, rechargeWallet])
 
   const purchaseInFlightRef = useRef(false)
-  const purchaseBundle = useCallback(async (plan: UiPlan, _apId: string) => {
+  const purchaseBundle = useCallback(async (plan: UiPlan, apId: string) => {
     if (!user) return
     if (purchaseInFlightRef.current) return
     purchaseInFlightRef.current = true
     setActionError(null)
+    // Best-effort geoloc — the *real* proximity gate is in start-segment.
+    // If the user denies geoloc here we still let the purchase go through;
+    // start-segment will refuse to consume any minutes far from the AP.
+    const getCoords = (): Promise<{ lat: number; lng: number; acc: number } | null> => new Promise((resolve) => {
+      if (typeof navigator === "undefined" || !navigator.geolocation) return resolve(null)
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy }),
+        () => resolve(null),
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 },
+      )
+    })
     try {
-      // Stable idempotency key per click intent: bucketed to 10s window so
-      // accidental double-taps collide on the backend and only one debit happens.
+      const coords = await getCoords()
       const bucket = Math.floor(Date.now() / 10000)
-      await purchaseBundleFn(plan.id, `${user.id}-${plan.id}-${bucket}`)
+      await purchaseBundleFn(
+        plan.id,
+        `${user.id}-${plan.id}-${bucket}`,
+        coords
+          ? { ap_id: apId, user_lat: coords.lat, user_lng: coords.lng, gps_accuracy_m: coords.acc }
+          : { ap_id: apId },
+      )
       await auth.refreshProfile()
       toast.success("Bundle acheté", { description: plan.name })
       setSelectedAP(null)
@@ -406,8 +422,30 @@ export function useAppState() {
 
   const startSession = useCallback(async (bundleId: string, ap: UiAP) => {
     setActionError(null)
+    // Ask for live geolocation so the server can enforce proximity. We don't
+    // trust the user's stored profile location — only a fresh fix counts.
+    const getPosition = (): Promise<GeolocationPosition> => new Promise((resolve, reject) => {
+      if (typeof navigator === "undefined" || !navigator.geolocation) {
+        reject(new Error("Géolocalisation non disponible sur cet appareil."))
+        return
+      }
+      navigator.geolocation.getCurrentPosition(
+        resolve,
+        (err) => reject(new Error(
+          err.code === err.PERMISSION_DENIED
+            ? "Autorisez la géolocalisation pour démarrer une session sur cette K-Zone."
+            : "Impossible d'obtenir votre position. Réessayez près du point d'accès."
+        )),
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 },
+      )
+    })
     try {
-      await startSegmentFn(bundleId, ap.id)
+      const pos = await getPosition()
+      await startSegmentFn(bundleId, ap.id, {
+        user_lat: pos.coords.latitude,
+        user_lng: pos.coords.longitude,
+        gps_accuracy_m: pos.coords.accuracy,
+      })
       toast.success("Session démarrée", { description: ap.name })
       setSelectedAP(null)
     } catch (e) {

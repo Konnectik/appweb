@@ -17,8 +17,14 @@ import type {
 // --- Access points (public; readable by all signed-in users) ------------------
 
 export function useAccessPoints() {
+  // Wait for auth — RLS on access_points requires `authenticated`. Without
+  // this guard the query fires before sign-in completes, RLS returns [] and
+  // the cache holds that empty result until staleTime expires, which is why
+  // markers only appeared after a hard refresh.
+  const { user } = useAuth()
   return useQuery({
-    queryKey: ["access-points"],
+    queryKey: ["access-points", user?.id ?? null],
+    enabled: !!user,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("access_points")

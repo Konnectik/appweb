@@ -53,3 +53,34 @@ self.addEventListener("fetch", (event) => {
       .catch(() => caches.match(req).then((hit) => hit || caches.match("/")))
   )
 })
+
+// --- Web Push handler ---------------------------------------------------
+// Backend sends payloads like:
+// { "title": "...", "body": "...", "url": "/sessions", "tag": "wallet" }
+self.addEventListener("push", (event) => {
+  let data = {}
+  try { data = event.data ? event.data.json() : {} } catch { data = {} }
+  const title = data.title || "Konnectik"
+  const options = {
+    body: data.body || "",
+    icon: "/logo-red.png",
+    badge: "/logo-red.png",
+    tag: data.tag || "konnectik",
+    data: { url: data.url || "/" },
+    renotify: !!data.tag,
+  }
+  event.waitUntil(self.registration.showNotification(title, options))
+})
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close()
+  const target = (event.notification.data && event.notification.data.url) || "/"
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((wins) => {
+      for (const w of wins) {
+        if ("focus" in w) { w.navigate(target); return w.focus() }
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(target)
+    })
+  )
+})

@@ -487,15 +487,31 @@ export const mockGiftCredits: GiftCredit[] = [
 ]
 
 // Helper functions to compute derived values
+//
+// Sums minutes consumed across all segments of a bundle and returns what's
+// left. The DB segment_status enum is `active | ended | expired | error` —
+// any non-active segment counts as consumed time. Previously we filtered on
+// legacy values ("completed", "terminated") which never matched real rows,
+// so the UI showed the full bundle even after sessions had been used.
 export function computeBundleRemainingMinutes(bundle: UserBundle, segments: SessionSegment[]): number {
-  const completedMinutes = segments
-    .filter(s => s.bundle_id === bundle.id && (s.status === "completed" || s.status === "terminated"))
-    .reduce((sum, s) => sum + s.time_used_minutes, 0)
-  
-  const activeSegment = segments.find(s => s.bundle_id === bundle.id && s.status === "active")
-  const activeMinutes = activeSegment?.time_used_minutes ?? 0
-  
-  return Math.max(0, bundle.total_minutes - completedMinutes - activeMinutes)
+  const bundleSegments = segments.filter(s => s.bundle_id === bundle.id)
+
+  // Time already locked-in: anything not active.
+  const consumedMinutes = bundleSegments
+    .filter(s => s.status !== "active")
+    .reduce((sum, s) => sum + (s.time_used_minutes ?? 0), 0)
+
+  // For the currently-active segment, prefer the live elapsed time over the
+  // last persisted time_used_minutes (which is only written when end-segment
+  // runs). Falls back to time_used_minutes if started_at is missing.
+  const activeSegment = bundleSegments.find(s => s.status === "active")
+  let activeMinutes = activeSegment?.time_used_minutes ?? 0
+  if (activeSegment?.started_at) {
+    const elapsed = (Date.now() - new Date(activeSegment.started_at).getTime()) / 60000
+    activeMinutes = Math.max(activeMinutes, Math.floor(elapsed))
+  }
+
+  return Math.max(0, bundle.total_minutes - consumedMinutes - activeMinutes)
 }
 
 export function getActiveSegment(segments: SessionSegment[]): SessionSegment | null {

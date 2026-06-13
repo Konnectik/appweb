@@ -4,6 +4,7 @@ import "./globals.css"
 import { Providers } from "@/components/providers"
 import { ServiceWorkerRegister } from "@/components/sw-register"
 import { InstallPrompt } from "@/components/install-prompt"
+import { PushSubscribe } from "@/components/push-subscribe"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <Providers>{children}</Providers>
         <ServiceWorkerRegister />
         <InstallPrompt />
+        <PushSubscribe />
       </body>
     </html>
   )

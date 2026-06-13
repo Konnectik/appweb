@@ -19,8 +19,19 @@ export interface PurchaseBundleResponse {
   new_balance_xaf?: number
   message?: string
 }
-export function purchaseBundleFn(plan_id: string, idempotency_key?: string) {
-  return invoke<PurchaseBundleResponse>("purchase-bundle", { plan_id, idempotency_key })
+export function purchaseBundleFn(
+  plan_id: string,
+  idempotency_key?: string,
+  opts?: { ap_id?: string; user_lat?: number; user_lng?: number; gps_accuracy_m?: number },
+) {
+  return invoke<PurchaseBundleResponse>("purchase-bundle", {
+    plan_id,
+    idempotency_key,
+    ap_id: opts?.ap_id,
+    user_lat: opts?.user_lat,
+    user_lng: opts?.user_lng,
+    gps_accuracy_m: opts?.gps_accuracy_m,
+  })
 }
 
 // --- start-segment ------------------------------------------------------------
@@ -33,8 +44,19 @@ export interface StartSegmentResponse {
   mikrotik_user_name?: string
   message?: string
 }
-export function startSegmentFn(bundle_id: string, ap_id?: string, mac_address?: string) {
-  return invoke<StartSegmentResponse>("start-segment", { bundle_id, ap_id, mac_address })
+export function startSegmentFn(
+  bundle_id: string,
+  ap_id: string,
+  opts?: { mac_address?: string; user_lat?: number; user_lng?: number; gps_accuracy_m?: number },
+) {
+  return invoke<StartSegmentResponse>("start-segment", {
+    bundle_id,
+    ap_id,
+    mac_address: opts?.mac_address,
+    user_lat: opts?.user_lat,
+    user_lng: opts?.user_lng,
+    gps_accuracy_m: opts?.gps_accuracy_m,
+  })
 }
 
 // --- end-segment --------------------------------------------------------------

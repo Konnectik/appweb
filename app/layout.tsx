@@ -36,10 +36,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body className={`${inter.variable} font-sans antialiased`}>
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          {/* PushSubscribe must live inside <Providers> because it calls useAuth(). */}
+          <PushSubscribe />
+        </Providers>
         <ServiceWorkerRegister />
         <InstallPrompt />
-        <PushSubscribe />
       </body>
     </html>
   )

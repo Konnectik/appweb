@@ -503,6 +503,28 @@ export function useAppState() {
     markAllRead.mutate()
   }, [markAllRead])
 
+  const copyReferralCode = useCallback(() => {
+    const code = user?.referral_code
+    if (!code) {
+      toast.error("Code indisponible")
+      return
+    }
+    navigator.clipboard.writeText(code).then(
+      () => toast.success("Code copié", { description: code }),
+      () => toast.error("Impossible de copier le code"),
+    )
+  }, [user])
+
+  const shareReferralCode = useCallback(() => {
+    const code = user?.referral_code
+    if (!code) {
+      toast.error("Code indisponible")
+      return
+    }
+    const message = `Rejoins Konnectik avec mon code parrainage ${code} et profite du Wi-Fi partout au Cameroun !`
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer")
+  }, [user])
+
   return {
     // Auth
     isAuthenticated: !!auth.session,
@@ -569,5 +591,7 @@ export function useAppState() {
     resumeSession,
     markNotificationRead,
     markAllNotificationsRead,
+    copyReferralCode,
+    shareReferralCode,
   }
 }

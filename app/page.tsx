@@ -209,8 +209,8 @@ export default function KonnectikApp() {
           friendsPurchased={state.referralStats.friends_purchased}
           giftMinutes={state.referralStats.gift_minutes_remaining}
           referralMinutesEarned={state.referralStats.referral_minutes_earned}
-          onShare={() => {}}
-          onCopyCode={() => {}}
+          onShare={state.shareReferralCode}
+          onCopyCode={state.copyReferralCode}
         />
       </MobileShell>
     )

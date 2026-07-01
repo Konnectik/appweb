@@ -15,10 +15,18 @@ interface RechargeSheetProps {
 
 const quickAmounts = [500, 1000, 2000, 5000]
 
+/** Affiche le numéro sans préfixe 237 — le backend normalise au format 237XXXXXXXXX. */
+function toDisplayPhone(raw: string): string {
+  const digits = raw.replace(/\D/g, "")
+  if (digits.startsWith("00237")) return digits.slice(5)
+  if (digits.startsWith("237") && digits.length === 12) return digits.slice(3)
+  return raw.replace(/\D/g, "").slice(0, 9)
+}
+
 export function RechargeSheet({ onClose, onRecharge, userPhone }: RechargeSheetProps) {
   const [amount, setAmount] = useState<number>(1000)
   const [provider, setProvider] = useState<"mtn" | "orange">("mtn")
-  const [phone, setPhone] = useState(userPhone || "")
+  const [phone, setPhone] = useState(() => toDisplayPhone(userPhone || ""))
 
   const fee = Math.ceil(amount * 0.05)
   const totalToCharge = amount + fee

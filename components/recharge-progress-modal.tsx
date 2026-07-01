@@ -10,6 +10,7 @@ interface RechargeProgressModalProps {
   open: boolean
   status: RechargeProgressStatus
   amountXaf: number
+  totalChargedXaf?: number
   method: "mtn" | "orange"
   startedAt: number | null
   onClose: () => void
@@ -22,6 +23,7 @@ export function RechargeProgressModal({
   open,
   status,
   amountXaf,
+  totalChargedXaf,
   method,
   startedAt,
   onClose,
@@ -49,6 +51,7 @@ export function RechargeProgressModal({
   if (!open) return null
 
   const providerName = method === "mtn" ? "MTN MoMo" : "Orange Money"
+  const chargeAmount = totalChargedXaf ?? amountXaf
 
   return (
     <div className="fixed inset-0 z-1200 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -97,7 +100,7 @@ export function RechargeProgressModal({
               <h3 className="text-lg font-semibold text-foreground">Validez sur votre téléphone</h3>
               <p className="text-sm text-muted-foreground mt-1">
                 Une notification {providerName} a été envoyée. Entrez votre code PIN pour confirmer{" "}
-                <span className="font-semibold text-foreground">{amountXaf.toLocaleString()} XAF</span>.
+                <span className="font-semibold text-foreground">{chargeAmount.toLocaleString()} XAF</span>.
               </p>
               {remainingSec !== null && (
                 <p className="text-xs text-muted-foreground mt-3">

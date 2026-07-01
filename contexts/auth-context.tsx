@@ -122,13 +122,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (data.terms_agreed) updates.terms_agreed_at = new Date().toISOString()
 
         if (Object.keys(updates).length > 0) {
-          // RLS allows the user to update their own profile.
-          await supabase.from("profiles").update(updates).eq("id", userId)
+          const { error: profileError } = await supabase.from("profiles").update(updates).eq("id", userId)
+          if (profileError) return { error: profileError.message }
+          await loadProfile(userId)
         }
       }
       return { error: null }
     },
-    []
+    [loadProfile]
   )
 
   const signInWithGoogle = useCallback(async () => {

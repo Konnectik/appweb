@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils"
 
 interface RechargeSheetProps {
   onClose: () => void
-  onRecharge: (amount: number, provider: "mtn" | "orange") => void
+  onRecharge: (amount: number, provider: "mtn" | "orange", phone: string) => void
   userPhone?: string
 }
 
@@ -25,7 +25,7 @@ export function RechargeSheet({ onClose, onRecharge, userPhone }: RechargeSheetP
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onRecharge(amount, provider)
+    onRecharge(amount, provider, phone.trim())
   }
 
   return (

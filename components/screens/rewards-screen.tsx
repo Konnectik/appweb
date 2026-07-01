@@ -11,6 +11,7 @@ interface RewardsScreenProps {
   friendsSignedUp: number
   friendsPurchased: number
   giftMinutes: number
+  referralMinutesEarned: number
   onShare: () => void
   onCopyCode: () => void
 }
@@ -19,14 +20,15 @@ export function RewardsScreen({
   onBack, 
   referralCode, 
   friendsSignedUp, 
-  friendsPurchased, 
+  friendsPurchased,
   giftMinutes,
+  referralMinutesEarned,
   onShare,
   onCopyCode 
 }: RewardsScreenProps) {
-  const progressToNextReward = (friendsPurchased % 10) / 10 * 100
-  const friendsNeeded = 10 - (friendsPurchased % 10)
-  const totalRewardsEarned = Math.floor(friendsPurchased / 10)
+  const progressToNextReward = (friendsSignedUp % 10) / 10 * 100
+  const friendsNeeded = friendsSignedUp % 10 === 0 && friendsSignedUp > 0 ? 10 : 10 - (friendsSignedUp % 10)
+  const totalRewardsEarned = referralMinutesEarned
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -63,7 +65,7 @@ export function RewardsScreen({
         <div className="px-4 pb-4">
           <div className="bg-card border border-border rounded-2xl p-5">
             <h2 className="text-base font-semibold text-foreground mb-1">Your Referral Code</h2>
-            <p className="text-sm text-muted-foreground mb-4">Share with friends and earn 30 free minutes for every 10 who purchase.</p>
+            <p className="text-sm text-muted-foreground mb-4">Share with friends and earn 30 free minutes for every 10 who create an account.</p>
             
             <div className="flex items-center gap-2 mb-4">
               <div className="flex-1 bg-muted rounded-xl p-4">
@@ -97,13 +99,15 @@ export function RewardsScreen({
               <div className="flex-1">
                 <Progress value={progressToNextReward} className="h-3" />
               </div>
-              <span className="text-sm font-medium text-foreground">{friendsPurchased % 10}/10</span>
+              <span className="text-sm font-medium text-foreground">{friendsSignedUp % 10}/10</span>
             </div>
 
             <p className="text-sm text-muted-foreground mb-6">
-              {friendsNeeded === 10 
-                ? "Invite friends to start earning rewards!" 
-                : `${friendsNeeded} more friend${friendsNeeded > 1 ? 's' : ''} need to purchase to earn 30 free minutes.`}
+              {friendsSignedUp === 0
+                ? "Invite friends to start earning rewards!"
+                : friendsSignedUp % 10 === 0
+                  ? "Bravo ! 30 minutes viennent d'être ajoutées à votre solde cadeau."
+                  : `${friendsNeeded} more friend${friendsNeeded > 1 ? 's' : ''} need to sign up to earn 30 free minutes.`}
             </p>
 
             {/* Stats */}
@@ -120,7 +124,7 @@ export function RewardsScreen({
               </div>
               <div className="bg-muted rounded-xl p-3 text-center">
                 <Clock className="w-5 h-5 text-muted-foreground mx-auto mb-1" />
-                <p className="text-lg font-bold text-foreground">{totalRewardsEarned * 30}</p>
+                <p className="text-lg font-bold text-foreground">{totalRewardsEarned}</p>
                 <p className="text-xs text-muted-foreground">Min earned</p>
               </div>
             </div>
@@ -134,7 +138,7 @@ export function RewardsScreen({
             {[
               { step: 1, text: "Share your referral code with friends" },
               { step: 2, text: "Friends sign up using your code" },
-              { step: 3, text: "When 10 friends make their first purchase, you earn 30 free minutes" },
+              { step: 3, text: "When 10 friends create their account, you earn 30 free minutes" },
             ].map((item) => (
               <div key={item.step} className="flex items-start gap-3">
                 <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center shrink-0">

@@ -200,6 +200,25 @@ export function useNotifications() {
   return query
 }
 
+// --- Referral events ----------------------------------------------------------
+
+export function useReferralEvents() {
+  const { user } = useAuth()
+  return useQuery({
+    queryKey: ["referral-events", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("referral_events")
+        .select("id, event_type, referred_id, created_at")
+        .eq("referrer_id", user!.id)
+        .order("created_at", { ascending: false })
+      if (error) throw error
+      return data ?? []
+    },
+  })
+}
+
 // --- Gift credits -------------------------------------------------------------
 
 export function useGiftCredits() {

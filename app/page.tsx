@@ -141,7 +141,7 @@ export default function KonnectikApp() {
         {state.showRechargeSheet && (
           <RechargeSheet
             onClose={() => state.setShowRechargeSheet(false)}
-            onRecharge={(amount, method) => state.rechargeWallet(amount, method)}
+            onRecharge={(amount, method, phone) => state.rechargeWallet(amount, method, phone)}
             userPhone={state.user?.phone || ""}
           />
         )}
@@ -149,6 +149,7 @@ export default function KonnectikApp() {
           open={!!state.pendingRecharge}
           status={state.pendingRecharge?.status ?? "initiating"}
           amountXaf={state.pendingRecharge?.amountXaf ?? 0}
+          totalChargedXaf={state.pendingRecharge?.totalChargedXaf}
           method={state.pendingRecharge?.method ?? "mtn"}
           startedAt={state.pendingRecharge?.startedAt ?? null}
           onClose={state.closePendingRecharge}
@@ -207,6 +208,7 @@ export default function KonnectikApp() {
           friendsSignedUp={state.referralStats.friends_signed_up}
           friendsPurchased={state.referralStats.friends_purchased}
           giftMinutes={state.referralStats.gift_minutes_remaining}
+          referralMinutesEarned={state.referralStats.referral_minutes_earned}
           onShare={() => {}}
           onCopyCode={() => {}}
         />
@@ -351,7 +353,7 @@ export default function KonnectikApp() {
       {state.showRechargeSheet && (
         <RechargeSheet
           onClose={() => state.setShowRechargeSheet(false)}
-          onRecharge={(amount, method) => state.rechargeWallet(amount, method)}
+          onRecharge={(amount, method, phone) => state.rechargeWallet(amount, method, phone)}
           userPhone={state.user?.phone || ""}
         />
       )}
@@ -361,6 +363,7 @@ export default function KonnectikApp() {
         open={!!state.pendingRecharge}
         status={state.pendingRecharge?.status ?? "initiating"}
         amountXaf={state.pendingRecharge?.amountXaf ?? 0}
+        totalChargedXaf={state.pendingRecharge?.totalChargedXaf}
         method={state.pendingRecharge?.method ?? "mtn"}
         startedAt={state.pendingRecharge?.startedAt ?? null}
         onClose={state.closePendingRecharge}

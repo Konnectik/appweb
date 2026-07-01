@@ -12,6 +12,8 @@ import {
   useNotifications,
   useMarkNotificationRead,
   useMarkAllNotificationsRead,
+  useGiftCredits,
+  useReferralEvents,
 } from "@/lib/supabase/queries"
 import {
   purchaseBundleFn,
@@ -35,7 +37,7 @@ import type {
   WalletTransaction as UiTx,
   AppNotification as UiNotif,
 } from "@/lib/mock-data"
-import { mockReferralStats, computeBundleRemainingMinutes, getActiveBundle, getActiveSegment } from "@/lib/mock-data"
+import { computeBundleRemainingMinutes, getActiveBundle, getActiveSegment } from "@/lib/mock-data"
 
 export type Screen = "main" | "notifications" | "rewards" | "profile" | "settings" | "help" | "login" | "register" | "bundles" | "usage" | "gifts"
 export type TabId = "wallet" | "map" | "sessions"
@@ -157,6 +159,8 @@ export function useAppState() {
   const segQ = useSessionSegments()
   const txQ = useWalletTransactions()
   const notifQ = useNotifications()
+  const giftsQ = useGiftCredits()
+  const referralQ = useReferralEvents()
   const markRead = useMarkNotificationRead()
   const markAllRead = useMarkAllNotificationsRead()
 
@@ -186,6 +190,8 @@ export function useAppState() {
   type PendingRecharge = {
     transactionId: string
     amountXaf: number
+    totalChargedXaf: number
+    phone: string
     method: "mtn" | "orange"
     startedAt: number
     status: "initiating" | "awaiting_ussd" | "confirmed" | "failed" | "timeout"
@@ -197,6 +203,23 @@ export function useAppState() {
   const activeSegment = getActiveSegment(segments)
   const remainingMinutes = activeBundle ? computeBundleRemainingMinutes(activeBundle, segments) : 0
   const unreadNotifications = notifications.filter((n) => !n.read_at).length
+
+  const referralStats = useMemo(() => {
+    const events = referralQ.data ?? []
+    const friendsSignedUp = events.filter((e) => e.event_type === "signup").length
+    const friendsPurchased = events.filter((e) => e.event_type === "first_purchase").length
+    const gifts = giftsQ.data ?? []
+    const giftMinutesRemaining = gifts.reduce((sum, g) => sum + (g.minutes_remaining ?? 0), 0)
+    const referralMinutesEarned = gifts
+      .filter((g) => g.type === "referral")
+      .reduce((sum, g) => sum + (g.minutes_total ?? 0), 0)
+    return {
+      friends_signed_up: friendsSignedUp,
+      friends_purchased: friendsPurchased,
+      gift_minutes_remaining: giftMinutesRemaining,
+      referral_minutes_earned: referralMinutesEarned,
+    }
+  }, [referralQ.data, giftsQ.data])
 
   // User shape (mock-compatible, fed by real profile)
   const user = useMemo(() => {
@@ -295,7 +318,7 @@ export function useAppState() {
     toast.error(title, { description: msg })
   }, [])
 
-  const rechargeWallet = useCallback(async (amount: number, method: "mtn" | "orange") => {
+  const rechargeWallet = useCallback(async (amount: number, method: "mtn" | "orange", phoneInput?: string) => {
     if (!user) return
     setActionError(null)
     const scheduleRefreshes = () => {
@@ -303,15 +326,18 @@ export function useAppState() {
         setTimeout(() => { auth.refreshProfile() }, delay)
       }
     }
-    const phone = user.phone || ""
+    const phone = (phoneInput?.trim() || user.phone || "").trim()
     if (!phone) {
-      toast.error("Numéro requis", { description: "Ajoutez un numéro de téléphone dans votre profil." })
+      toast.error("Numéro requis", { description: "Saisissez votre numéro mobile money." })
       return
     }
+    const totalChargedXaf = amount + Math.ceil(amount * 0.05)
     setShowRechargeSheet(false)
     setPendingRecharge({
       transactionId: "",
       amountXaf: amount,
+      totalChargedXaf,
+      phone,
       method,
       startedAt: Date.now(),
       status: "initiating",
@@ -321,6 +347,7 @@ export function useAppState() {
       setPendingRecharge((prev) => prev ? {
         ...prev,
         transactionId: res.transaction_id,
+        totalChargedXaf: res.total_charged_xaf ?? totalChargedXaf,
         status: "awaiting_ussd",
       } : null)
       scheduleRefreshes()
@@ -376,9 +403,9 @@ export function useAppState() {
 
   const retryPendingRecharge = useCallback(() => {
     if (!pendingRecharge) return
-    const { amountXaf, method } = pendingRecharge
+    const { amountXaf, method, phone } = pendingRecharge
     setPendingRecharge(null)
-    rechargeWallet(amountXaf, method)
+    rechargeWallet(amountXaf, method, phone)
   }, [pendingRecharge, rechargeWallet])
 
   const purchaseInFlightRef = useRef(false)
@@ -493,7 +520,7 @@ export function useAppState() {
     segments,
     transactions,
     notifications,
-    referralStats: mockReferralStats,
+    referralStats,
     profileComplete,
     activeBundle,
     activeSegment,

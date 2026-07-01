@@ -158,17 +158,15 @@ export function RegisterScreen({
 
             <Field>
               <FieldLabel htmlFor="phone" className="sr-only">Téléphone</FieldLabel>
-              <div className="relative flex items-center gap-2 h-12 bg-muted/60 rounded-md px-2">
-                <span className="text-base shrink-0">🇨🇲</span>
-                <span className="text-xs text-muted-foreground shrink-0">+237</span>
+              <div className="relative">
                 <Input
                   id="phone"
                   type="tel"
                   inputMode="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Phone Number"
-                  className="flex-1 h-9 bg-transparent border-0 pr-8 focus-visible:ring-0"
+                  placeholder="6XX XX XX XX"
+                  className="h-12 bg-muted/60 border-0 pr-10"
                   autoComplete="tel"
                 />
                 <Phone className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
